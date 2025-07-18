@@ -1,0 +1,10 @@
+# requirements.txt
+openai
+langchain
+langchain-community
+langchain-openai
+faiss-cpu
+tiktoken
+python-dotenv
+pypdf
+streamlit
