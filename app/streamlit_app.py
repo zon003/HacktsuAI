@@ -7,7 +7,7 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.append(project_root)
 
 # rag/rag_pipeline.py から必要な関数をインポート
-from rag.rag_pipeline import load_vectorstore, build_rag_chain # run_queryは通常不要のため、直接RAGチェーンを呼び出すため
+from rag.rag_pipeline import load_vectorstore, build_rag_chain # run_queryは通常不要、直接RAGチェーンを呼び出すため
 
 # LangChainのMessages型をStreamlitの表示用に変換するためのヘルパー関数
 from langchain_core.messages import HumanMessage, AIMessage
