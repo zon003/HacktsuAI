@@ -8,3 +8,4 @@ tiktoken
 python-dotenv
 pypdf
 streamlit
+google-cloud-storage
