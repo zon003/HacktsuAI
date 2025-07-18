@@ -127,3 +127,4 @@ if __name__ == "__main__":
     answer1 = run_query(rag_chain, query1, current_chat_history)
     print(f"メンターAI: {answer1}")
     current_chat_history.extend([HumanMessage(content=query1), AIMessage(content=answer1)])
+    
