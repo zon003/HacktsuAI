@@ -86,4 +86,5 @@ st.sidebar.title("設定・操作")
 if st.sidebar.button("チャット履歴をクリア"):
     st.session_state.chat_history = [] # 履歴を空にする
     # RAGチェーンも再初期化する場合は、以下の行のコメントを外す
-    # st
+    # st.session_state.rag_chain = None 
+    st.rerun() # アプリを再実行して状態をクリア
