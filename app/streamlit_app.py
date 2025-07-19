@@ -1,9 +1,16 @@
 import streamlit as st
 import os
 from langchain_core.messages import HumanMessage, AIMessage
+import sys
 
-# rag_pipeline.py から必要な関数をインポートします
-# load_vectorstore と build_rag_chain をインポートして、このファイルでRAGチェーンを構築します
+# プロジェクトのルートディレクトリをPythonのパスに追加します
+# app/streamlit_app.py から見て、一つ上のディレクトリがプロジェクトルートです
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+sys.path.insert(0, project_root) # プロジェクトルートをPythonパスの先頭に追加
+
+from langchain_core.messages import HumanMessage, AIMessage
+
+# rag.rag_pipeline をインポートできるようになります
 from rag.rag_pipeline import load_vectorstore, build_rag_chain, run_query
 
 # --- 環境変数の設定 ---
