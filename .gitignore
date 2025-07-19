@@ -211,3 +211,7 @@ data/
 
 # GCPのJSONキー
 gcp_keys/
+
+test.py
+
+.streamlit/secrets.toml
