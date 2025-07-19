@@ -25,7 +25,7 @@ project_root = os.path.abspath(os.path.join(script_dir, os.pardir)) # ragから�
 # ★ GCS関連の設定
 # app/streamlit_app.py と同じ GCS_BUCKET_NAME を使用することが重要
 # 環境変数から取得するのが本番環境では望ましい
-GCS_BUCKET_NAME = os.getenv("GCS_BUCKET_NAME", "hacktsuai-rag-data-bucket-unique-id") # .envまたはStreamlit Secretsから取得
+GCS_BUCKET_NAME = os.getenv("GCS_BUCKET_NAME") # .envまたはStreamlit Secretsから取得
 
 # ★ GCP認証情報の設定
 # GCP_SERVICE_ACCOUNT_KEY_JSON または GCP_SERVICE_ACCOUNT_KEY_BASE64 を環境変数から取得することを優先
