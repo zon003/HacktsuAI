@@ -21,7 +21,7 @@ GCS_BUCKET_NAME = "hacktsuai-rag-data-bucket-unique-id" # ★ あなたが作成
 # ★ サービスアカウントキーファイルのパス
 # Codespacesやローカルで実行する場合のパス。本番デプロイでは環境変数で渡すのが一般的。
 # 通常、このキーファイルはGitに含めない。
-GCP_SERVICE_ACCOUNT_KEY_PATH = os.path.join(project_root, "gcp_keys", "hacktsuai-rag-project-e65ee603943f.json") # ★ 適切なパスに置き換える
+GCP_SERVICE_ACCOUNT_KEY_PATH = os.path.join(project_root, "gcp_keys", "hacktsuai-rag-project-e8e5eb12875d.json") # ★ 適切なパスに置き換える
 
 # 環境変数からサービスアカウントキーを読み込む設定 (推奨)
 # Streamlit Community Cloud の Secrets に設定する場合など

@@ -213,5 +213,6 @@ data/
 gcp_keys/
 
 test.py
+test2.py
 
 .streamlit/secrets.toml
