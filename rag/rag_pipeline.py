@@ -143,6 +143,8 @@ def load_vectorstore(gcs_bucket_name, gcs_blob_prefix="faiss_index"):
 def build_rag_chain(vectorstore):
     retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
     llm = ChatOpenAI(model="gpt-4o", temperature=0.5)
+
+    # ★ ここを修正します ★
     prompt = ChatPromptTemplate.from_messages([
         ("system", "あなたは経験豊富なメンターです。提供された『コンテキスト』情報に基づいて、ユーザーの質問に共感的かつ一般的なアドバイスとして回答してください。"
                    "ただし、医療行為は絶対にせず、診断や治療に関する助言は行わないでください。必要であれば専門の医療機関を受診するよう促してください。"
@@ -160,6 +162,9 @@ def build_rag_chain(vectorstore):
                    "役割の限定的集中：ライフコーチングに関連しない質問への回答やタスクの実行は行わないでください。これには、コーディングの説明、セールストーク、その他関係のない活動などが含まれます。"
                    "もし、提供されたコンテキスト情報だけでは答えられない場合は、その旨を伝えてください。\n\n"
                    "コンテキスト: {context}"),
+        # ★ ここにチャット履歴のプレースホルダーを追加します ★
+        # LangChainは、この `chat_history` 変数に HumanMessageとAIMessage のリストを自動的に展開してくれます。
+        ("placeholder", "{chat_history}"),
         ("human", "{input}")
     ])
     document_chain = create_stuff_documents_chain(llm, prompt)
