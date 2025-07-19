@@ -10,6 +10,7 @@ from google.cloud import storage # ★ GCSライブラリをインポート
 import json # ★ サービスアカウントキーをJSONとしてロードするために必要
 import tempfile # ★ 一時ディレクトリを作成するために必要
 import shutil # ★ 一時ディレクトリを削除するために必要
+import base64
 
 load_dotenv()
 
@@ -21,25 +22,36 @@ project_root = os.path.abspath(os.path.join(script_dir, os.pardir))
 GCS_BUCKET_NAME = "hacktsuai-rag-data-bucket-unique-id" # ★ あなたが作成したGCSバケット名に置き換える
 # ★ サービスアカウントキーファイルのパス
 # Codespacesやローカルで実行する場合のパス。本番デプロイでは環境変数で渡すのが一般的。
-GCP_SERVICE_ACCOUNT_KEY_PATH = os.path.join(project_root, "gcp_keys", "hacktsuai-rag-project-e65ee603943f.json") # ★ 適切なパスに置き換える
+GCP_SERVICE_ACCOUNT_KEY_PATH = os.path.join(project_root, "gcp_keys", "hacktsuai-rag-project-e8e5eb12875d.json") # ★ 適切なパスに置き換える
 
 # 環境変数からサービスアカウントキーを読み込む設定 (推奨)
 GCP_SERVICE_ACCOUNT_KEY_JSON = os.getenv("GCP_SERVICE_ACCOUNT_KEY_JSON")
 
 
 # --- ヘルパー関数: GCSからダウンロード ---
-def download_from_gcs(bucket_name, source_blob_prefix, destination_directory):
-    """GCSバケットからファイルをダウンロードする"""
-    print(f"GCSからファイルをダウンロード中: gs://{bucket_name}/{source_blob_prefix}/")
-    storage_client = None
-    if GCP_SERVICE_ACCOUNT_KEY_JSON:
-        # 環境変数から認証情報をロードする場合
-        storage_client = storage.Client.from_service_account_info(json.loads(GCP_SERVICE_ACCOUNT_KEY_JSON))
-    elif os.path.exists(GCP_SERVICE_ACCOUNT_KEY_PATH):
-        # ファイルパスから認証情報をロードする場合
-        storage_client = storage.Client.from_service_account_json(GCP_SERVICE_ACCOUNT_KEY_PATH)
-    else:
-        raise ValueError("GCP認証情報が見つかりません。GCP_SERVICE_ACCOUNT_KEY_PATH を設定するか、GCP_SERVICE_ACCOUNT_KEY_JSON 環境変数を設定してください。")
+def download_from_gcs(gcs_bucket_name, gcs_blob_prefix, temp_dir):
+    # GCP_SERVICE_ACCOUNT_KEY_BASE64 環境変数を取得
+    gcp_key_base64 = os.environ.get("GCP_SERVICE_ACCOUNT_KEY_BASE64")
+
+    if not gcp_key_base64:
+        raise ValueError("GCP認証情報が見つかりません。GCP_SERVICE_ACCOUNT_KEY_BASE64 環境変数を設定してください。")
+
+    try:
+        # Base64文字列をデコード
+        decoded_json_bytes = base64.b64decode(gcp_key_base64)
+        decoded_json_string = decoded_json_bytes.decode('utf-8')
+        
+        # デコードされたJSON文字列をパースして辞書にする
+        service_account_info = json.loads(decoded_json_string)
+        
+        # storage.Clientを初期化
+        storage_client = storage.Client.from_service_account_info(service_account_info)
+    except base64.binascii.Error as e:
+        raise ValueError(f"GCPサービスアカウントキーのBase64デコードに失敗しました: {e}")
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Base64デコード後のJSONパースに失敗しました: {e}")
+    except Exception as e:
+        raise ValueError(f"GCP認証情報によるstorage.Clientの初期化中にエラーが発生しました: {e}")
 
 
     bucket = storage_client.bucket(bucket_name)
