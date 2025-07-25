@@ -28,7 +28,7 @@ if not GCS_BUCKET_NAME:
     st.stop()
 
 
-st.title("あなたのメンターAI")
+st.title("HackTsu メンターAI")
 
 # --- Streamlit Session State の初期化 ---
 # アプリケーションの状態をセッション間で保持するために使用します
@@ -43,11 +43,11 @@ if "chat_history" not in st.session_state:
 # 時間のかかる処理を、アプリのセッション開始時に一度だけ実行し、結果をキャッシュします。
 @st.cache_resource
 def get_rag_chain(bucket_name):
-    st.info("💡 ベクトルストアとRAGチェーンを初期化中です。初回は時間がかかります...")
+    st.info("💡 初期化中です。初回は時間がかかります...")
     try:
         vectorstore = load_vectorstore(bucket_name)
         rag_chain = build_rag_chain(vectorstore)
-        st.success("✨ 初期化完了！メンターAIと話し始めましょう。")
+        st.success("✨ 初期化完了！HackTsuメンターAIと話し始めましょう。")
         return rag_chain
     except Exception as e:
         st.error(f"エラーが発生しました: RAGチェーンの初期化に失敗しました。{e}")
