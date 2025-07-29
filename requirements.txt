@@ -9,3 +9,6 @@ python-dotenv
 pypdf
 streamlit
 google-cloud-storage
+fastapi
+uvicorn[standard]
+PyJWT
