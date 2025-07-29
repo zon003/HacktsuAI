@@ -1,29 +1,17 @@
 steps:
+  # Docker イメージをビルド
   - name: 'gcr.io/cloud-builders/docker'
     args:
-      - build
+      - 'build'
       - '-t'
-      - 'asia-northeast1-docker.pkg.dev/hacktsuai-rag-project/cloud-run-source-deploy/fastapi-app:$COMMIT_SHA'
+      - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/fastapi-app:$SHORT_SHA'
       - '.'
 
+  # Docker イメージを Artifact Registry に push
   - name: 'gcr.io/cloud-builders/docker'
     args:
-      - push
-      - 'asia-northeast1-docker.pkg.dev/hacktsuai-rag-project/cloud-run-source-deploy/fastapi-app:$COMMIT_SHA'
-
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-    entrypoint: 'gcloud'
-    args:
-      - 'run'
-      - 'deploy'
-      - 'fastapi-app'
-      - '--image=asia-northeast1-docker.pkg.dev/hacktsuai-rag-project/cloud-run-source-deploy/fastapi-app:$COMMIT_SHA'
-      - '--region=asia-northeast1'
-      - '--platform=managed'
-      - '--allow-unauthenticated'
+      - 'push'
+      - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/fastapi-app:$SHORT_SHA'
 
 images:
-  - 'asia-northeast1-docker.pkg.dev/hacktsuai-rag-project/cloud-run-source-deploy/fastapi-app:$COMMIT_SHA'
-
-options:
-  logging: CLOUD_LOGGING_ONLY
+  - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/fastapi-app:$SHORT_SHA'
