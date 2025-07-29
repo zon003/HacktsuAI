@@ -137,3 +137,7 @@ async def chat_endpoint(request: Request):
         # その他の予期せぬエラー
         print(f"An unexpected error occurred: {e}")
         raise HTTPException(status_code=500, detail=f"AI processing error: {e}")
+    
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -21,4 +21,4 @@ ENV PORT 8080
 # アプリケーションの実行コマンド
 # uvicorn はASGIサーバーで、FastAPIアプリケーションを起動するために必要です。
 # main:app は、main.py ファイル内の `app` という名前のFastAPIインスタンスを指します。
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "$PORT"]
