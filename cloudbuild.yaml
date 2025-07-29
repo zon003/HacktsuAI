@@ -1,30 +1,26 @@
-# cloudbuild.yaml（グローバルに配置）
+# cloudbuild.yaml
 
 steps:
-- name: 'gcr.io/cloud-builders/docker'
-  args:
-    [
-      'build',
-      '-t',
-      'asia-northeast1-docker.pkg.dev/hacktsuai-rag-project/cloud-run-source-deploy/fastapi-app:$COMMIT_SHA',
-      '.'
-    ]
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - build
+      - '-t'
+      - 'asia-northeast1-docker.pkg.dev/hacktsuai-rag-project/cloud-run-source-deploy/fastapi-app:$COMMIT_SHA'
+      - '.'
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'fastapi-app'
+      - '--image=asia-northeast1-docker.pkg.dev/hacktsuai-rag-project/cloud-run-source-deploy/fastapi-app:$COMMIT_SHA'
+      - '--region=asia-northeast1'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
 
 images:
   - 'asia-northeast1-docker.pkg.dev/hacktsuai-rag-project/cloud-run-source-deploy/fastapi-app:$COMMIT_SHA'
-
-- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-  entrypoint: gcloud
-  args:
-    [
-      'run',
-      'deploy',
-      'fastapi-app',
-      '--image=asia-northeast1-docker.pkg.dev/hacktsuai-rag-project/cloud-run-source-deploy/fastapi-app:$COMMIT_SHA',
-      '--region=asia-northeast1',
-      '--platform=managed',
-      '--allow-unauthenticated'
-    ]
 
 options:
   logging: CLOUD_LOGGING_ONLY
