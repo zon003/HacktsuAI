@@ -18,7 +18,9 @@ COPY . .
 # FastAPIアプリケーションがリッスンするポートを設定 (Cloud Runの標準ポートは8080)
 ENV PORT 8080
 
+EXPOSE 8080
+
 # アプリケーションの実行コマンド
 # uvicorn はASGIサーバーで、FastAPIアプリケーションを起動するために必要です。
 # main:app は、main.py ファイル内の `app` という名前のFastAPIインスタンスを指します。
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "$PORT"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
