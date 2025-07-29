@@ -43,13 +43,24 @@ if "chat_history" not in st.session_state:
 # 時間のかかる処理を、アプリのセッション開始時に一度だけ実行し、結果をキャッシュします。
 @st.cache_resource
 def get_rag_chain(bucket_name):
-    st.info("💡 初期化中です。初回は時間がかかります...")
+    # プレースホルダーを作成
+    status_placeholder = st.empty()
+
+    # 初期化中のメッセージをプレースホルダーに表示
+    status_placeholder.info("💡 初期化中です。初回は時間がかかります...")
+
     try:
-        vectorstore = load_vectorstore(bucket_name)
-        rag_chain = build_rag_chain(vectorstore)
+        vectorstore = load_vectorstore(bucket_name) # この関数は定義済みと仮定
+        rag_chain = build_rag_chain(vectorstore)   # この関数は定義済みと仮定
+
+        # 初期化完了メッセージを表示する前に、プレースホルダーをクリアする
+        status_placeholder.empty()
+
         st.success("✨ 初期化完了！HackTsuメンターAIと話し始めましょう。")
         return rag_chain
     except Exception as e:
+        # エラー発生時もプレースホルダーをクリアし、エラーメッセージを表示して停止
+        status_placeholder.empty()
         st.error(f"エラーが発生しました: RAGチェーンの初期化に失敗しました。{e}")
         st.stop() # エラー時はアプリの実行を停止します
 
