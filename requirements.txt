@@ -11,4 +11,4 @@ streamlit
 google-cloud-storage
 fastapi
 uvicorn[standard]
-PyJWT
+PyJWT>=2.8.0

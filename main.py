@@ -4,9 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 from dotenv import load_dotenv
 
-# JWT関連のインポート
-from Firebase.JWT import JWT, PyJWTError
-from Firebase.JWT import algorithms
+from jwt import decode, PyJWTError
 
 # rag_pipeline.py から必要な関数をインポート
 from rag.rag_pipeline import load_vectorstore, build_rag_chain, run_query
@@ -75,7 +73,7 @@ async def chat_endpoint(request: Request):
             raise HTTPException(status_code=401, detail="JWT token is required.")
 
         try:
-            payload = JWT.decode(jwt_token, JWT_SECRET_KEY, algorithms=["HS256"])
+            payload = decode(jwt_token, JWT_SECRET_KEY, algorithms=["HS256"])
             if payload.get("user_id") != wp_user_id:
                 raise HTTPException(status_code=403, detail="JWT user ID mismatch.")
         except PyJWTError as e:
@@ -108,4 +106,3 @@ if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8080))  # Cloud Run対応
     uvicorn.run("main:app", host="0.0.0.0", port=port)
-    
