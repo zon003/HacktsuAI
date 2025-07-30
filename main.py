@@ -5,6 +5,7 @@ import os
 from dotenv import load_dotenv
 
 from jwt import decode, PyJWTError
+import uvicorn
 
 # rag_pipeline.py から必要な関数をインポート
 from rag.rag_pipeline import load_vectorstore, build_rag_chain, run_query
@@ -103,5 +104,5 @@ async def chat_endpoint(request: Request):
 
 # --- ローカル起動用 ---
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8080, reload=False)
+    port = int(os.environ.get("PORT", 8080))  # Cloud Runが指定するPORTを使う
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
