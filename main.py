@@ -2,7 +2,7 @@
 import os
 import uvicorn
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request, Header
 from fastapi.middleware.cors import CORSMiddleware
 from jwt import decode, PyJWTError
 from langchain_core.messages import HumanMessage, AIMessage
@@ -56,19 +56,15 @@ async def health_check():
 
 # --- チャットエンドポイント ---
 @app.post("/chat", response_model=ChatResponse)
-async def chat_endpoint(payload: ChatRequest):
+async def chat_endpoint(payload: ChatRequest, authorization: str = Header(None)):
+    # --- Authorization ヘッダーから JWT を取得 ---
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Authorization header missing or malformed")
+    jwt_token = authorization.split(" ")[1]
+
     user_message = payload.message
-    jwt_token = payload.jwtToken
     wp_user_id = payload.userId
     posted_history = payload.chatHistory or []
-
-    # --- 入力検証 ---
-    if not user_message:
-        raise HTTPException(status_code=400, detail="message is required.")
-    if not jwt_token:
-        raise HTTPException(status_code=401, detail="jwtToken is required.")
-    if not wp_user_id:
-        raise HTTPException(status_code=400, detail="userId is required.")
 
     # --- JWT検証 ---
     try:
@@ -108,6 +104,7 @@ async def chat_endpoint(payload: ChatRequest):
 
     return {"response": ai_response}
 
+# --- チャット履歴取得エンドポイント ---
 @app.get("/history")
 async def get_chat_history(user_id: str, request: Request):
     jwt_token = request.headers.get("Authorization")

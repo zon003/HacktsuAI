@@ -2,13 +2,12 @@ from pydantic import BaseModel
 from typing import List, Optional
 
 class ChatMessage(BaseModel):
-    role: str  # "user" or "assistant"
+    role: str  # "user" または "assistant"
     content: str
 
 class ChatRequest(BaseModel):
-    message: str
     userId: str
-    jwtToken: str
+    message: str
     chatHistory: Optional[List[ChatMessage]] = []
 
 class ChatResponse(BaseModel):
