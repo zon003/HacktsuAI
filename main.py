@@ -108,6 +108,27 @@ async def chat_endpoint(payload: ChatRequest):
 
     return {"response": ai_response}
 
+@app.get("/history")
+async def get_chat_history(user_id: str, request: Request):
+    jwt_token = request.headers.get("Authorization")
+    if not jwt_token or not jwt_token.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Authorization header missing or malformed")
+
+    token = jwt_token.split(" ")[1]
+    try:
+        payload = decode(token, JWT_SECRET_KEY, algorithms=["HS256"])
+        if payload.get("user_id") != user_id:
+            raise HTTPException(status_code=403, detail="JWT user_id mismatch.")
+    except PyJWTError as e:
+        print(f"JWT Error (GET /history): {e}")
+        raise HTTPException(status_code=401, detail="Invalid JWT token.")
+
+    try:
+        history = load_chat_history(user_id)
+        return {"history": history}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to load history: {e}")
+    
 # --- ローカル起動用（開発環境） ---
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8080))
