@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from typing import List, Optional
 
 class ChatMessage(BaseModel):
-    role: str  # "user" または "assistant"
+    role: str  # 'user' or 'assistant'
     content: str
 
 class ChatRequest(BaseModel):
