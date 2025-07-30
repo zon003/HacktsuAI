@@ -1,16 +1,35 @@
-from google.cloud import storage
 import json
+from google.cloud import storage
+from io import BytesIO
+import os
 
-def save_chat_history(bucket_name: str, user_id: str, history: list):
-    client = storage.Client()
-    bucket = client.bucket(bucket_name)
-    blob = bucket.blob(f"chat_history/user_{user_id}.json")
-    blob.upload_from_string(json.dumps(history, ensure_ascii=False), content_type='application/json')
+GCS_BUCKET_NAME = os.getenv("GCS_BUCKET_NAME")
+CHAT_HISTORY_PREFIX = "chat_histories"
 
-def load_chat_history(bucket_name: str, user_id: str) -> list:
-    client = storage.Client()
-    bucket = client.bucket(bucket_name)
-    blob = bucket.blob(f"chat_history/user_{user_id}.json")
-    if blob.exists():
-        return json.loads(blob.download_as_text())
-    return []
+client = storage.Client()
+
+def get_blob_path(user_id: str) -> str:
+    return f"{CHAT_HISTORY_PREFIX}/{user_id}.json"
+
+def save_chat_history(user_id: str, history: list):
+    try:
+        bucket = client.get_bucket(GCS_BUCKET_NAME)
+        blob = bucket.blob(get_blob_path(user_id))
+        blob.upload_from_string(json.dumps(history), content_type="application/json")
+        print(f"[GCS] Chat history saved for user {user_id}")
+    except Exception as e:
+        print(f"[GCS ERROR] Failed to save history for user {user_id}: {e}")
+
+def load_chat_history(user_id: str) -> list:
+    try:
+        bucket = client.get_bucket(GCS_BUCKET_NAME)
+        blob = bucket.blob(get_blob_path(user_id))
+        if not blob.exists():
+            print(f"[GCS] No history found for user {user_id}")
+            return []
+        content = blob.download_as_text()
+        print(f"[GCS] Chat history loaded for user {user_id}")
+        return json.loads(content)
+    except Exception as e:
+        print(f"[GCS ERROR] Failed to load history for user {user_id}: {e}")
+        return []
