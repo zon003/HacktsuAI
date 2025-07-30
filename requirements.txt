@@ -12,3 +12,5 @@ google-cloud-storage
 fastapi
 uvicorn[standard]
 PyJWT>=2.8.0
+python-jose
+pydantic
