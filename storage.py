@@ -1,20 +1,20 @@
+# storage.py
+import os
 import json
 from google.cloud import storage
-from io import BytesIO
-import os
 
-GCS_BUCKET_NAME = os.getenv("GCS_BUCKET_NAME")
+GCS_BUCKET_NAME    = os.getenv("GCS_BUCKET_NAME")
 CHAT_HISTORY_PREFIX = "chat_histories"
 
 client = storage.Client()
 
-def get_blob_path(user_id: str) -> str:
+def _blob_path(user_id: str) -> str:
     return f"{CHAT_HISTORY_PREFIX}/{user_id}.json"
 
 def save_chat_history(user_id: str, history: list):
     try:
         bucket = client.get_bucket(GCS_BUCKET_NAME)
-        blob = bucket.blob(get_blob_path(user_id))
+        blob   = bucket.blob(_blob_path(user_id))
         blob.upload_from_string(json.dumps(history), content_type="application/json")
         print(f"[GCS] Chat history saved for user {user_id}")
     except Exception as e:
@@ -23,7 +23,7 @@ def save_chat_history(user_id: str, history: list):
 def load_chat_history(user_id: str) -> list:
     try:
         bucket = client.get_bucket(GCS_BUCKET_NAME)
-        blob = bucket.blob(get_blob_path(user_id))
+        blob   = bucket.blob(_blob_path(user_id))
         if not blob.exists():
             print(f"[GCS] No history found for user {user_id}")
             return []
