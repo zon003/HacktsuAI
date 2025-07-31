@@ -1,22 +1,10 @@
 steps:
 - name: 'gcr.io/cloud-builders/docker'
-  id: 'Build Docker Image'
   args: [
-    'build',
-    '-t', 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/fastapi-app:$SHORT_SHA',
-    '.']
-
-- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-  id: 'Deploy to Cloud Run'
-  entrypoint: gcloud
-  args: [
-    'run', 'deploy', 'fastapi-app',
-    '--image', 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/fastapi-app:$SHORT_SHA',
-    '--region', 'asia-northeast1',
-    '--platform', 'managed',
-    '--allow-unauthenticated',
-    '--port', '8080',
-    '--timeout', '3600']
+    'build', 
+    '-t', 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/fastapi-app:$SHORT_SHA', 
+    '.'
+  ]
 
 images:
 - 'asia-northeast1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/fastapi-app:$SHORT_SHA'
