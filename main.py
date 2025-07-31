@@ -4,12 +4,13 @@ import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from jwt import decode, PyJWTError
 from langchain_core.messages import HumanMessage, AIMessage
 
 from rag.rag_pipeline import load_vectorstore, build_rag_chain, run_query
 from storage import load_chat_history, save_chat_history
 from models import ChatRequest, ChatResponse
+
+from auth import decode_jwt_token  # ← auth.pyから読み込む
 
 # --- 環境変数の読み込み (.env) ---
 load_dotenv()
@@ -30,11 +31,9 @@ app.add_middleware(
 )
 
 # --- 必須の環境変数確認 ---
-MY_AI_JWT_SECRET_KEY = os.getenv("MY_AI_JWT_SECRET_KEY")
-GCS_BUCKET_NAME = os.getenv("GCS_BUCKET_NAME")
-if not MY_AI_JWT_SECRET_KEY:
+if not os.getenv("MY_AI_JWT_SECRET_KEY"):
     raise ValueError("MY_AI_JWT_SECRET_KEY が未設定です。")
-if not GCS_BUCKET_NAME:
+if not os.getenv("GCS_BUCKET_NAME"):
     raise ValueError("GCS_BUCKET_NAME が未設定です。")
 
 # --- グローバル RAG インスタンス ---
@@ -45,7 +44,7 @@ rag_chain_instance = None
 async def startup_event():
     global vectorstore_instance, rag_chain_instance
     print("✅ RAGチェーンの初期化を開始...")
-    vectorstore_instance = load_vectorstore(GCS_BUCKET_NAME)
+    vectorstore_instance = load_vectorstore(os.getenv("GCS_BUCKET_NAME"))
     rag_chain_instance = build_rag_chain(vectorstore_instance)
     print("✅ RAGチェーンの初期化が完了しました。")
 
@@ -69,14 +68,10 @@ async def chat_endpoint(payload: ChatRequest, request: Request):
     if not wp_user_id:
         raise HTTPException(status_code=400, detail="userId is required.")
 
-    # JWT 検証
-    try:
-        decoded = decode(jwt_token, MY_AI_JWT_SECRET_KEY, algorithms=["HS256"])
-        if decoded.get("user_id") != wp_user_id:
-            raise HTTPException(status_code=403, detail="JWT user_id mismatch.")
-    except PyJWTError as e:
-        print(f"❌ JWT verification failed: {e}")
-        raise HTTPException(status_code=401, detail="Invalid JWT token.")
+    # JWT 検証（auth.py に統一）
+    decoded = decode_jwt_token(jwt_token)
+    if str(decoded.get("user_id")) != str(wp_user_id):
+        raise HTTPException(status_code=403, detail="JWT user_id mismatch.")
 
     # 履歴統合
     persisted_history = load_chat_history(wp_user_id)
@@ -114,13 +109,9 @@ async def get_chat_history(user_id: str, request: Request):
         raise HTTPException(status_code=401, detail="Authorization header missing or malformed")
 
     token = jwt_token.split(" ")[1]
-    try:
-        payload = decode(token, MY_AI_JWT_SECRET_KEY, algorithms=["HS256"])
-        if payload.get("user_id") != user_id:
-            raise HTTPException(status_code=403, detail="JWT user_id mismatch.")
-    except PyJWTError as e:
-        print(f"JWT Error (GET /history): {e}")
-        raise HTTPException(status_code=401, detail="Invalid JWT token.")
+    decoded = decode_jwt_token(token)
+    if str(decoded.get("user_id")) != str(user_id):
+        raise HTTPException(status_code=403, detail="JWT user_id mismatch.")
 
     try:
         history = load_chat_history(user_id)
