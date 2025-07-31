@@ -4,6 +4,8 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt, JWTError
 import logging
 logger = logging.getLogger(__name__)
+from dotenv import load_dotenv
+load_dotenv()
 
 security = HTTPBearer()
 SECRET_KEY = os.getenv("MY_AI_JWT_SECRET_KEY")
