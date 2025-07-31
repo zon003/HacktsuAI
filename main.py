@@ -1,15 +1,15 @@
-# main.py
+# main.py (FastAPIアプリケーションのメインファイル)
 import os
 import uvicorn
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException, Request, Depends
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from jwt import decode, PyJWTError
 from langchain_core.messages import HumanMessage, AIMessage
 
 from rag.rag_pipeline import load_vectorstore, build_rag_chain, run_query
 from storage import load_chat_history, save_chat_history
 from models import ChatRequest, ChatResponse
-from auth import get_current_user  # 🔐 JWT検証はこちらに委譲
 
 # --- 環境変数の読み込み (.env) ---
 load_dotenv()
@@ -30,7 +30,10 @@ app.add_middleware(
 )
 
 # --- 必須の環境変数確認 ---
+MY_AI_JWT_SECRET_KEY = os.getenv("MY_AI_JWT_SECRET_KEY")
 GCS_BUCKET_NAME = os.getenv("GCS_BUCKET_NAME")
+if not MY_AI_JWT_SECRET_KEY:
+    raise ValueError("MY_AI_JWT_SECRET_KEY が未設定です。")
 if not GCS_BUCKET_NAME:
     raise ValueError("GCS_BUCKET_NAME が未設定です。")
 
@@ -51,15 +54,29 @@ async def health_check():
     return {"status": "ok", "message": "FastAPI service is running."}
 
 @app.post("/chat", response_model=ChatResponse)
-async def chat_endpoint(payload: ChatRequest, wp_user_id: str = Depends(get_current_user)):
-    if payload.userId != wp_user_id:
-        raise HTTPException(status_code=403, detail="JWT user_id mismatch.")
+async def chat_endpoint(payload: ChatRequest, request: Request):
+    jwt_header = request.headers.get("Authorization")
+    if not jwt_header or not jwt_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Authorization header missing or malformed")
+    jwt_token = jwt_header.split(" ")[1]
 
     user_message = payload.message
+    wp_user_id = payload.userId
     posted_history = payload.chatHistory or []
 
     if not user_message:
         raise HTTPException(status_code=400, detail="message is required.")
+    if not wp_user_id:
+        raise HTTPException(status_code=400, detail="userId is required.")
+
+    # JWT 検証
+    try:
+        decoded = decode(jwt_token, MY_AI_JWT_SECRET_KEY, algorithms=["HS256"])
+        if decoded.get("user_id") != wp_user_id:
+            raise HTTPException(status_code=403, detail="JWT user_id mismatch.")
+    except PyJWTError as e:
+        print(f"❌ JWT verification failed: {e}")
+        raise HTTPException(status_code=401, detail="Invalid JWT token.")
 
     # 履歴統合
     persisted_history = load_chat_history(wp_user_id)
@@ -91,9 +108,19 @@ async def chat_endpoint(payload: ChatRequest, wp_user_id: str = Depends(get_curr
     return {"response": ai_response}
 
 @app.get("/history")
-async def get_chat_history(user_id: str, wp_user_id: str = Depends(get_current_user)):
-    if str(user_id) != str(wp_user_id):
-        raise HTTPException(status_code=403, detail="JWT user_id mismatch.")
+async def get_chat_history(user_id: str, request: Request):
+    jwt_token = request.headers.get("Authorization")
+    if not jwt_token or not jwt_token.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Authorization header missing or malformed")
+
+    token = jwt_token.split(" ")[1]
+    try:
+        payload = decode(token, MY_AI_JWT_SECRET_KEY, algorithms=["HS256"])
+        if payload.get("user_id") != user_id:
+            raise HTTPException(status_code=403, detail="JWT user_id mismatch.")
+    except PyJWTError as e:
+        print(f"JWT Error (GET /history): {e}")
+        raise HTTPException(status_code=401, detail="Invalid JWT token.")
 
     try:
         history = load_chat_history(user_id)
