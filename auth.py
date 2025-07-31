@@ -6,7 +6,7 @@ from jose import jwt, JWTError
 security = HTTPBearer()
 SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 ALGORITHM = "HS256"
-EXPECTED_ISSUER = "https://hacktsu.doyou.love"
+EXPECTED_ISSUER = os.getenv("EXPECTED_ISSUER", "https://hacktsu.doyou.love")  # ← デフォルトもOK
 EXPECTED_AUDIENCE = "my-ai-chat-app"
 
 def decode_jwt_token(token: str):
