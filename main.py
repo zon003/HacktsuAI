@@ -30,10 +30,10 @@ app.add_middleware(
 )
 
 # --- 必須の環境変数確認 ---
-JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+MY_AI_JWT_SECRET_KEY = os.getenv("MY_AI_JWT_SECRET_KEY")
 GCS_BUCKET_NAME = os.getenv("GCS_BUCKET_NAME")
-if not JWT_SECRET_KEY:
-    raise ValueError("JWT_SECRET_KEY が未設定です。")
+if not MY_AI_JWT_SECRET_KEY:
+    raise ValueError("MY_AI_JWT_SECRET_KEY が未設定です。")
 if not GCS_BUCKET_NAME:
     raise ValueError("GCS_BUCKET_NAME が未設定です。")
 
@@ -71,7 +71,7 @@ async def chat_endpoint(payload: ChatRequest, request: Request):
 
     # JWT 検証
     try:
-        decoded = decode(jwt_token, JWT_SECRET_KEY, algorithms=["HS256"])
+        decoded = decode(jwt_token, MY_AI_JWT_SECRET_KEY, algorithms=["HS256"])
         if decoded.get("user_id") != wp_user_id:
             raise HTTPException(status_code=403, detail="JWT user_id mismatch.")
     except PyJWTError as e:
@@ -115,7 +115,7 @@ async def get_chat_history(user_id: str, request: Request):
 
     token = jwt_token.split(" ")[1]
     try:
-        payload = decode(token, JWT_SECRET_KEY, algorithms=["HS256"])
+        payload = decode(token, MY_AI_JWT_SECRET_KEY, algorithms=["HS256"])
         if payload.get("user_id") != user_id:
             raise HTTPException(status_code=403, detail="JWT user_id mismatch.")
     except PyJWTError as e:

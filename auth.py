@@ -6,7 +6,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 security = HTTPBearer()
-SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+SECRET_KEY = os.getenv("MY_AI_JWT_SECRET_KEY")
 ALGORITHM = "HS256"
 EXPECTED_ISSUER = os.getenv("EXPECTED_ISSUER", "https://hacktsu.doyou.love")  # ← デフォルトもOK
 EXPECTED_AUDIENCE = "my-ai-chat-app"
