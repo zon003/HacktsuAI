@@ -10,8 +10,8 @@ load_dotenv()
 security = HTTPBearer()
 SECRET_KEY = os.getenv("MY_AI_JWT_SECRET_KEY")
 ALGORITHM = "HS256"
-EXPECTED_ISSUER = os.getenv("EXPECTED_ISSUER", "https://hacktsu.doyou.love")  # ← デフォルトもOK
-EXPECTED_AUDIENCE = "my-ai-chat-app"
+EXPECTED_AUDIENCE = os.getenv("EXPECTED_AUDIENCE", "my-ai-chat-app")
+EXPECTED_ISSUER   = os.getenv("EXPECTED_ISSUER", "http://dekoboko.local")
 
 def decode_jwt_token(token: str):
     try:
