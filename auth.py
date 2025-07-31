@@ -12,8 +12,8 @@ logger = logging.getLogger(__name__)
 
 SECRET_KEY        = os.getenv("MY_AI_JWT_SECRET_KEY")
 ALGORITHM         = "HS256"
-# 空文字ではなく、トークンに実際に入れている値をデフォルトにする
-EXPECTED_ISSUER   = os.getenv("EXPECTED_ISSUER", "http://dekoboko.local")
+# JWT に入れている値をデフォルトに設定
+EXPECTED_ISSUER   = os.getenv("EXPECTED_ISSUER", "https://hacktsu.doyou.love")
 EXPECTED_AUDIENCE = os.getenv("EXPECTED_AUDIENCE", "my-ai-chat-app")
 
 def decode_jwt_token(token: str):
