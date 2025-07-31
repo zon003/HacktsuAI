@@ -2,6 +2,8 @@ import os
 from fastapi import HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt, JWTError
+import logging
+logger = logging.getLogger(__name__)
 
 security = HTTPBearer()
 SECRET_KEY = os.getenv("JWT_SECRET_KEY")
@@ -20,6 +22,7 @@ def decode_jwt_token(token: str):
         )
         return payload
     except JWTError as e:
+        logger.error(f"JWT Decode Failed: {str(e)}")  # ログ出力を追加
         raise HTTPException(status_code=401, detail=f"Invalid JWT: {str(e)}")
 
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
