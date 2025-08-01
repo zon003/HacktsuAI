@@ -9,8 +9,8 @@ class ChatMessage(BaseModel):
 class ChatRequest(BaseModel):
     userId: str
     message: str
-    jwtToken: str
-    chatHistory: Optional[List[ChatMessage]] = []
+    jwtToken: Optional[str] = None             # ← ここを Optional & デフォルト None に
+    chatHistory: List[ChatMessage] = []        # デフォルト空リスト
 
 class ChatResponse(BaseModel):
     response: str
